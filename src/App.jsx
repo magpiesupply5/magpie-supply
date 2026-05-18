@@ -131,6 +131,10 @@ const SectionTitle = ({ sub, main, desc, light = false, align = "center" }) => (
 
 const MagpieSupply = () => {
   const [scrollY, setScrollY] = useState(0);
+  const [isMobile, setIsMobile] = useState(
+    typeof window !== "undefined" ? window.innerWidth < 768 : false
+  );
+  const [menuOpen, setMenuOpen] = useState(false);
 
   useEffect(() => {
     // Load Outfit (English) + Pretendard (Korean)
@@ -151,7 +155,14 @@ const MagpieSupply = () => {
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
+  useEffect(() => {
+    const handleResize = () => setIsMobile(window.innerWidth < 768);
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
+
   const scrollTo = (id) => {
+    setMenuOpen(false);
     const el = document.getElementById(id);
     if (el) el.scrollIntoView({ behavior: "smooth" });
   };
@@ -240,14 +251,126 @@ const MagpieSupply = () => {
             display: "flex",
             alignItems: "center",
             justifyContent: "space-between",
-            height: 76,
+            height: isMobile ? 64 : 76,
           }}
         >
           <div style={{ cursor: "pointer" }} onClick={() => scrollTo("home")}>
-            <MagpieLogo size={42} />
+            <MagpieLogo size={isMobile ? 36 : 42} />
           </div>
 
-          <div style={{ display: "flex", gap: 36, alignItems: "center" }}>
+          {!isMobile && (
+            <div style={{ display: "flex", gap: 36, alignItems: "center" }}>
+              {navItems.map((item) => (
+                <button
+                  key={item.id}
+                  onClick={() => scrollTo(item.id)}
+                  style={{
+                    background: "none",
+                    border: "none",
+                    cursor: "pointer",
+                    fontFamily: BASE_FONT,
+                    fontSize: 14,
+                    fontWeight: 500,
+                    letterSpacing: "0.02em",
+                    color: "#0F2B4A",
+                    opacity: 0.75,
+                    padding: "8px 0",
+                    transition: "opacity 0.2s",
+                  }}
+                  onMouseEnter={(e) => (e.target.style.opacity = 1)}
+                  onMouseLeave={(e) => (e.target.style.opacity = 0.75)}
+                >
+                  {item.label}
+                </button>
+              ))}
+              <button
+                onClick={() => scrollTo("contact")}
+                style={{
+                  background: "#0F2B4A",
+                  color: "#fff",
+                  border: "none",
+                  borderRadius: 4,
+                  padding: "11px 26px",
+                  fontFamily: BASE_FONT,
+                  fontSize: 13,
+                  fontWeight: 600,
+                  letterSpacing: "0.05em",
+                  cursor: "pointer",
+                  transition: "all 0.3s",
+                }}
+                onMouseEnter={(e) => (e.target.style.background = "#163D66")}
+                onMouseLeave={(e) => (e.target.style.background = "#0F2B4A")}
+              >
+                Inquire
+              </button>
+            </div>
+          )}
+
+          {isMobile && (
+            <button
+              onClick={() => setMenuOpen(!menuOpen)}
+              aria-label="Menu"
+              style={{
+                background: "none",
+                border: "none",
+                cursor: "pointer",
+                padding: 8,
+                display: "flex",
+                flexDirection: "column",
+                gap: 5,
+                width: 40,
+              }}
+            >
+              <span
+                style={{
+                  display: "block",
+                  height: 2,
+                  width: 24,
+                  background: "#0F2B4A",
+                  borderRadius: 2,
+                  transition: "all 0.3s",
+                  transform: menuOpen ? "rotate(45deg) translate(5px, 5px)" : "none",
+                }}
+              />
+              <span
+                style={{
+                  display: "block",
+                  height: 2,
+                  width: 24,
+                  background: "#0F2B4A",
+                  borderRadius: 2,
+                  transition: "all 0.3s",
+                  opacity: menuOpen ? 0 : 1,
+                }}
+              />
+              <span
+                style={{
+                  display: "block",
+                  height: 2,
+                  width: 24,
+                  background: "#0F2B4A",
+                  borderRadius: 2,
+                  transition: "all 0.3s",
+                  transform: menuOpen ? "rotate(-45deg) translate(5px, -5px)" : "none",
+                }}
+              />
+            </button>
+          )}
+        </div>
+
+        {/* Mobile dropdown menu */}
+        {isMobile && menuOpen && (
+          <div
+            style={{
+              background: "rgba(255,255,255,0.98)",
+              backdropFilter: "blur(20px)",
+              borderTop: "1px solid rgba(15,43,74,0.08)",
+              padding: "16px clamp(20px, 5vw, 60px) 24px",
+              display: "flex",
+              flexDirection: "column",
+              gap: 4,
+            }}
+          >
             {navItems.map((item) => (
               <button
                 key={item.id}
@@ -257,16 +380,13 @@ const MagpieSupply = () => {
                   border: "none",
                   cursor: "pointer",
                   fontFamily: BASE_FONT,
-                  fontSize: 14,
+                  fontSize: 16,
                   fontWeight: 500,
-                  letterSpacing: "0.02em",
                   color: "#0F2B4A",
-                  opacity: 0.75,
-                  padding: "8px 0",
-                  transition: "opacity 0.2s",
+                  padding: "14px 0",
+                  textAlign: "left",
+                  borderBottom: "1px solid rgba(15,43,74,0.06)",
                 }}
-                onMouseEnter={(e) => (e.target.style.opacity = 1)}
-                onMouseLeave={(e) => (e.target.style.opacity = 0.75)}
               >
                 {item.label}
               </button>
@@ -278,28 +398,26 @@ const MagpieSupply = () => {
                 color: "#fff",
                 border: "none",
                 borderRadius: 4,
-                padding: "11px 26px",
+                padding: "16px 24px",
                 fontFamily: BASE_FONT,
-                fontSize: 13,
+                fontSize: 14,
                 fontWeight: 600,
                 letterSpacing: "0.05em",
                 cursor: "pointer",
-                transition: "all 0.3s",
+                marginTop: 12,
               }}
-              onMouseEnter={(e) => (e.target.style.background = "#163D66")}
-              onMouseLeave={(e) => (e.target.style.background = "#0F2B4A")}
             >
               Inquire
             </button>
           </div>
-        </div>
+        )}
       </nav>
 
       {/* ═══ HERO ═══ */}
       <section
         id="home"
         style={{
-          minHeight: "100vh",
+          minHeight: isMobile ? "auto" : "100vh",
           display: "flex",
           alignItems: "center",
           justifyContent: "center",
@@ -321,24 +439,24 @@ const MagpieSupply = () => {
         <div
           style={{
             textAlign: "center",
-            padding: "120px 80px 80px",
+            padding: isMobile ? "100px 24px 60px" : "120px 80px 80px",
             position: "relative",
             zIndex: 1,
             maxWidth: 1000,
           }}
         >
-          <div style={{ marginBottom: 56, display: "flex", justifyContent: "center" }}>
-            <LogoCard size={240} />
+          <div style={{ marginBottom: isMobile ? 32 : 56, display: "flex", justifyContent: "center" }}>
+            <LogoCard size={isMobile ? 160 : 240} />
           </div>
 
           <div
             style={{
               fontFamily: BASE_FONT,
-              fontSize: 12,
+              fontSize: isMobile ? 10 : 12,
               fontWeight: 600,
-              letterSpacing: "0.27em",
+              letterSpacing: isMobile ? "0.18em" : "0.27em",
               color: "#4A90D9",
-              marginBottom: 32,
+              marginBottom: isMobile ? 20 : 32,
               textTransform: "uppercase",
             }}
           >
@@ -348,7 +466,7 @@ const MagpieSupply = () => {
           <h1
             style={{
               fontFamily: BASE_FONT,
-              fontSize: "clamp(28px, 4.8vw, 52px)",
+              fontSize: isMobile ? "clamp(26px, 8vw, 36px)" : "clamp(28px, 4.8vw, 52px)",
               fontWeight: 700,
               color: "#0F2B4A",
               lineHeight: 1.15,
@@ -364,7 +482,7 @@ const MagpieSupply = () => {
           <p
             style={{
               fontFamily: BASE_FONT,
-              fontSize: "clamp(14px, 1.6vw, 17px)",
+              fontSize: isMobile ? 14 : "clamp(14px, 1.6vw, 17px)",
               fontWeight: 400,
               color: "#5a6a7a",
               lineHeight: 1.6,
@@ -380,19 +498,19 @@ const MagpieSupply = () => {
               width: 60,
               height: 1,
               background: "rgba(15,43,74,0.2)",
-              margin: "40px auto",
+              margin: isMobile ? "28px auto" : "40px auto",
             }}
           />
 
           <p
             style={{
               fontFamily: BASE_FONT,
-              fontSize: 15,
+              fontSize: isMobile ? 14 : 15,
               fontWeight: 400,
               color: "#3a4a5a",
               lineHeight: 1.75,
               maxWidth: 640,
-              margin: "0 auto 32px",
+              margin: "0 auto 24px",
               letterSpacing: "0.01em",
             }}
           >
@@ -407,8 +525,8 @@ const MagpieSupply = () => {
               src={BIRD_SRC}
               alt="Magpie"
               style={{
-                width: 100,
-                height: 100,
+                width: isMobile ? 80 : 100,
+                height: isMobile ? 80 : 100,
                 objectFit: "contain",
               }}
             />
@@ -485,24 +603,26 @@ const MagpieSupply = () => {
           </div>
         </div>
 
-        <div
-          style={{
-            position: "absolute",
-            bottom: 36,
-            left: "50%",
-            transform: "translateX(-50%)",
-            display: "flex",
-            flexDirection: "column",
-            alignItems: "center",
-            gap: 10,
-            opacity: 0.4,
-          }}
-        >
-          <span style={{ fontFamily: BASE_FONT, fontSize: 10, fontWeight: 600, letterSpacing: "0.3em", color: "#0F2B4A" }}>
-            SCROLL
-          </span>
-          <div style={{ width: 1, height: 40, background: "linear-gradient(to bottom, #0F2B4A, transparent)" }} />
-        </div>
+        {!isMobile && (
+          <div
+            style={{
+              position: "absolute",
+              bottom: 36,
+              left: "50%",
+              transform: "translateX(-50%)",
+              display: "flex",
+              flexDirection: "column",
+              alignItems: "center",
+              gap: 10,
+              opacity: 0.4,
+            }}
+          >
+            <span style={{ fontFamily: BASE_FONT, fontSize: 10, fontWeight: 600, letterSpacing: "0.3em", color: "#0F2B4A" }}>
+              SCROLL
+            </span>
+            <div style={{ width: 1, height: 40, background: "linear-gradient(to bottom, #0F2B4A, transparent)" }} />
+          </div>
+        )}
       </section>
 
       {/* ═══ STATS ═══ */}
@@ -518,22 +638,29 @@ const MagpieSupply = () => {
             maxWidth: 1280,
             margin: "0 auto",
             display: "grid",
-            gridTemplateColumns: "repeat(4, 1fr)",
+            gridTemplateColumns: isMobile ? "repeat(2, 1fr)" : "repeat(4, 1fr)",
           }}
         >
           {stats.map((s, i) => (
             <div
               key={i}
               style={{
-                padding: "48px 24px",
+                padding: isMobile ? "32px 16px" : "48px 24px",
                 textAlign: "center",
-                borderRight: i < 3 ? "1px solid rgba(15,43,74,0.06)" : "none",
+                borderRight: isMobile
+                  ? i % 2 === 0
+                    ? "1px solid rgba(15,43,74,0.06)"
+                    : "none"
+                  : i < 3
+                  ? "1px solid rgba(15,43,74,0.06)"
+                  : "none",
+                borderBottom: isMobile && i < 2 ? "1px solid rgba(15,43,74,0.06)" : "none",
               }}
             >
               <div
                 style={{
                   fontFamily: BASE_FONT,
-                  fontSize: 46,
+                  fontSize: isMobile ? 38 : 46,
                   fontWeight: 700,
                   color: "#0F2B4A",
                   lineHeight: 1,
@@ -545,11 +672,11 @@ const MagpieSupply = () => {
               <div
                 style={{
                   fontFamily: BASE_FONT,
-                  fontSize: 11,
+                  fontSize: isMobile ? 10 : 11,
                   fontWeight: 500,
                   color: "#8899aa",
                   marginTop: 12,
-                  letterSpacing: "0.12em",
+                  letterSpacing: "0.1em",
                   textTransform: "uppercase",
                 }}
               >
@@ -561,11 +688,11 @@ const MagpieSupply = () => {
       </section>
 
       {/* ═══ ABOUT ═══ */}
-      <section id="about" style={{ padding: "120px clamp(24px, 5vw, 60px)", background: "#ffffff" }}>
+      <section id="about" style={{ padding: isMobile ? "64px clamp(20px, 5vw, 60px)" : "120px clamp(24px, 5vw, 60px)", background: "#ffffff" }}>
         <div style={{ maxWidth: 1100, margin: "0 auto" }}>
-          <div style={{ display: "grid", gridTemplateColumns: "1fr 1.2fr", gap: 80, alignItems: "center" }}>
+          <div style={{ display: "grid", gridTemplateColumns: isMobile ? "1fr" : "1fr 1.2fr", gap: isMobile ? 40 : 80, alignItems: "center" }}>
             <div style={{ display: "flex", justifyContent: "center" }}>
-              <LogoCard size={400} />
+              <LogoCard size={isMobile ? 240 : 400} />
             </div>
 
             <div>
@@ -700,7 +827,7 @@ const MagpieSupply = () => {
       </section>
 
       {/* ═══ PRODUCTS ═══ */}
-      <section id="products" style={{ padding: "120px clamp(24px, 5vw, 60px)", background: "#FAFAF6" }}>
+      <section id="products" style={{ padding: isMobile ? "64px clamp(20px, 5vw, 60px)" : "120px clamp(24px, 5vw, 60px)", background: "#FAFAF6" }}>
         <div style={{ maxWidth: 1200, margin: "0 auto" }}>
           <SectionTitle
             sub="What We Supply"
@@ -711,7 +838,7 @@ const MagpieSupply = () => {
           <div
             style={{
               display: "grid",
-              gridTemplateColumns: "repeat(2, 1fr)",
+              gridTemplateColumns: isMobile ? "1fr" : "repeat(2, 1fr)",
               gap: 1,
               background: "rgba(15,43,74,0.08)",
               border: "1px solid rgba(15,43,74,0.08)",
@@ -836,7 +963,7 @@ const MagpieSupply = () => {
       <section
         id="process"
         style={{
-          padding: "120px clamp(24px, 5vw, 60px)",
+          padding: isMobile ? "64px clamp(20px, 5vw, 60px)" : "120px clamp(24px, 5vw, 60px)",
           background: "linear-gradient(170deg, #081A2E, #0F2B4A, #163D66)",
           position: "relative",
           overflow: "hidden",
@@ -853,7 +980,7 @@ const MagpieSupply = () => {
         <div style={{ maxWidth: 1100, margin: "0 auto", position: "relative" }}>
           <SectionTitle sub="How We Work" main="From Concept to Delivery" light />
 
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 32, marginTop: 60 }}>
+          <div style={{ display: "grid", gridTemplateColumns: isMobile ? "repeat(2, 1fr)" : "repeat(4, 1fr)", gap: isMobile ? 24 : 32, marginTop: isMobile ? 40 : 60 }}>
             {steps.map((step, i) => (
               <div
                 key={i}
@@ -897,7 +1024,7 @@ const MagpieSupply = () => {
       </section>
 
       {/* ═══ CONTACT ═══ */}
-      <section id="contact" style={{ padding: "120px clamp(24px, 5vw, 60px)", background: "#ffffff" }}>
+      <section id="contact" style={{ padding: isMobile ? "64px clamp(20px, 5vw, 60px)" : "120px clamp(24px, 5vw, 60px)", background: "#ffffff" }}>
         <div style={{ maxWidth: 1000, margin: "0 auto" }}>
           <SectionTitle
             sub="Let's Talk"
@@ -905,9 +1032,9 @@ const MagpieSupply = () => {
             desc="Whether you're launching a GWP program or sourcing packaging components, we'd love to hear from you."
           />
 
-          <div style={{ display: "grid", gridTemplateColumns: "1fr 1.3fr", gap: 60, marginTop: 56 }}>
+          <div style={{ display: "grid", gridTemplateColumns: isMobile ? "1fr" : "1fr 1.3fr", gap: isMobile ? 40 : 60, marginTop: isMobile ? 40 : 56 }}>
             <div>
-              <div style={{ marginBottom: 40 }}>
+              <div style={{ marginBottom: 28 }}>
                 <div
                   style={{
                     fontSize: 10,
@@ -924,7 +1051,7 @@ const MagpieSupply = () => {
                   stevejang@magpiesupply.kr
                 </div>
               </div>
-              <div style={{ marginBottom: 40 }}>
+              <div style={{ marginBottom: 28 }}>
                 <div
                   style={{
                     fontSize: 10,
@@ -939,11 +1066,9 @@ const MagpieSupply = () => {
                 </div>
                 <div style={{ fontSize: 15, color: "#3a4a5a", lineHeight: 1.7, fontWeight: 400 }}>
                   Seoul, South Korea
-                  <br />
-                  AirOffice Gimpo
                 </div>
               </div>
-              <div style={{ marginBottom: 40 }}>
+              <div style={{ marginBottom: 28 }}>
                 <div
                   style={{
                     fontSize: 10,
@@ -957,10 +1082,10 @@ const MagpieSupply = () => {
                   Manufacture &amp; QC
                 </div>
                 <div style={{ fontSize: 15, color: "#3a4a5a", lineHeight: 1.7, fontWeight: 400 }}>
-                  Tianjin Factory
+                  Tianjin, China
                 </div>
               </div>
-              <div style={{ marginBottom: 40 }}>
+              <div style={{ marginBottom: 28 }}>
                 <div
                   style={{
                     fontSize: 10,
@@ -1004,7 +1129,7 @@ const MagpieSupply = () => {
               style={{
                 background: "#FAFAF6",
                 borderRadius: 4,
-                padding: 48,
+                padding: isMobile ? 24 : 48,
                 border: "1px solid rgba(15,43,74,0.08)",
               }}
             >
@@ -1013,7 +1138,7 @@ const MagpieSupply = () => {
                 { label: "Email", placeholder: "jane@company.com", type: "email" },
                 { label: "Company", placeholder: "Your company name", type: "text" },
               ].map((field, i) => (
-                <div key={i} style={{ marginBottom: 24 }}>
+                <div key={i} style={{ marginBottom: isMobile ? 18 : 24 }}>
                   <label
                     style={{
                       fontSize: 10,
@@ -1021,7 +1146,7 @@ const MagpieSupply = () => {
                       letterSpacing: "0.2em",
                       color: "#5a6a7a",
                       display: "block",
-                      marginBottom: 10,
+                      marginBottom: 8,
                       textTransform: "uppercase",
                     }}
                   >
@@ -1032,7 +1157,7 @@ const MagpieSupply = () => {
                     placeholder={field.placeholder}
                     style={{
                       width: "100%",
-                      padding: "12px 0",
+                      padding: "10px 0",
                       border: "none",
                       borderBottom: "1px solid #ddd",
                       fontSize: 15,
@@ -1049,7 +1174,7 @@ const MagpieSupply = () => {
                 </div>
               ))}
 
-              <div style={{ marginBottom: 32 }}>
+              <div style={{ marginBottom: 24 }}>
                 <label
                   style={{
                     fontSize: 10,
@@ -1057,18 +1182,18 @@ const MagpieSupply = () => {
                     letterSpacing: "0.2em",
                     color: "#5a6a7a",
                     display: "block",
-                    marginBottom: 10,
+                    marginBottom: 8,
                     textTransform: "uppercase",
                   }}
                 >
                   Message
                 </label>
                 <textarea
-                  rows={4}
+                  rows={3}
                   placeholder="Tell us about your project..."
                   style={{
                     width: "100%",
-                    padding: "12px 0",
+                    padding: "10px 0",
                     border: "none",
                     borderBottom: "1px solid #ddd",
                     fontSize: 15,
