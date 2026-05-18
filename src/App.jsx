@@ -1034,14 +1034,14 @@ const MagpieSupply = () => {
 
           <div style={{ display: "grid", gridTemplateColumns: isMobile ? "1fr" : "1fr 1.3fr", gap: isMobile ? 40 : 60, marginTop: isMobile ? 40 : 56 }}>
             <div>
-              <div style={{ marginBottom: 28 }}>
+              <div style={{ marginBottom: 18 }}>
                 <div
                   style={{
                     fontSize: 10,
                     fontWeight: 600,
                     letterSpacing: "0.25em",
                     color: "#4A90D9",
-                    marginBottom: 10,
+                    marginBottom: 5,
                     textTransform: "uppercase",
                   }}
                 >
@@ -1051,14 +1051,14 @@ const MagpieSupply = () => {
                   stevejang@magpiesupply.kr
                 </div>
               </div>
-              <div style={{ marginBottom: 28 }}>
+              <div style={{ marginBottom: 18 }}>
                 <div
                   style={{
                     fontSize: 10,
                     fontWeight: 600,
                     letterSpacing: "0.25em",
                     color: "#4A90D9",
-                    marginBottom: 10,
+                    marginBottom: 5,
                     textTransform: "uppercase",
                   }}
                 >
@@ -1068,14 +1068,14 @@ const MagpieSupply = () => {
                   Seoul, South Korea
                 </div>
               </div>
-              <div style={{ marginBottom: 28 }}>
+              <div style={{ marginBottom: 18 }}>
                 <div
                   style={{
                     fontSize: 10,
                     fontWeight: 600,
                     letterSpacing: "0.25em",
                     color: "#4A90D9",
-                    marginBottom: 10,
+                    marginBottom: 5,
                     textTransform: "uppercase",
                   }}
                 >
@@ -1085,14 +1085,14 @@ const MagpieSupply = () => {
                   Tianjin, China
                 </div>
               </div>
-              <div style={{ marginBottom: 28 }}>
+              <div style={{ marginBottom: 18 }}>
                 <div
                   style={{
                     fontSize: 10,
                     fontWeight: 600,
                     letterSpacing: "0.25em",
                     color: "#4A90D9",
-                    marginBottom: 10,
+                    marginBottom: 5,
                     textTransform: "uppercase",
                   }}
                 >
@@ -1105,8 +1105,8 @@ const MagpieSupply = () => {
 
               <div
                 style={{
-                  marginTop: 56,
-                  paddingTop: 32,
+                  marginTop: isMobile ? 24 : 28,
+                  paddingTop: 24,
                   borderTop: "1px solid rgba(15,43,74,0.1)",
                   display: "flex",
                   alignItems: "center",
@@ -1242,16 +1242,26 @@ const MagpieSupply = () => {
           <div
             style={{
               display: "flex",
+              flexDirection: isMobile ? "column" : "row",
               justifyContent: "space-between",
-              alignItems: "center",
+              alignItems: isMobile ? "flex-start" : "center",
               flexWrap: "wrap",
-              gap: 24,
+              gap: isMobile ? 20 : 24,
               paddingBottom: 32,
               borderBottom: "1px solid rgba(255,255,255,0.1)",
             }}
           >
             <MagpieLogo size={40} light />
-            <div style={{ display: "flex", gap: 24 }}>
+            <div
+              style={{
+                display: "flex",
+                gap: 24,
+                overflowX: isMobile ? "auto" : "visible",
+                width: isMobile ? "100%" : "auto",
+                WebkitOverflowScrolling: "touch",
+                paddingBottom: isMobile ? 8 : 0,
+              }}
+            >
               {navItems.map((item) => (
                 <button
                   key={item.id}
@@ -1266,6 +1276,8 @@ const MagpieSupply = () => {
                     cursor: "pointer",
                     textTransform: "uppercase",
                     fontFamily: BASE_FONT,
+                    whiteSpace: "nowrap",
+                    flexShrink: 0,
                   }}
                 >
                   {item.label}
