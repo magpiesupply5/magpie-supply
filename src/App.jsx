@@ -135,6 +135,35 @@ const MagpieSupply = () => {
     typeof window !== "undefined" ? window.innerWidth < 768 : false
   );
   const [menuOpen, setMenuOpen] = useState(false);
+  const [formData, setFormData] = useState({ name: "", email: "", company: "", message: "" });
+  const [formStatus, setFormStatus] = useState("idle"); // idle | sending | success | error
+
+  const handleFormChange = (e) => {
+    setFormData({ ...formData, [e.target.name]: e.target.value });
+  };
+
+  const handleFormSubmit = async () => {
+    if (!formData.name || !formData.email || !formData.message) {
+      setFormStatus("error");
+      return;
+    }
+    setFormStatus("sending");
+    try {
+      const res = await fetch("https://formspree.io/f/xqejkypr", {
+        method: "POST",
+        headers: { "Content-Type": "application/json", Accept: "application/json" },
+        body: JSON.stringify(formData),
+      });
+      if (res.ok) {
+        setFormStatus("success");
+        setFormData({ name: "", email: "", company: "", message: "" });
+      } else {
+        setFormStatus("error");
+      }
+    } catch {
+      setFormStatus("error");
+    }
+  };
 
   useEffect(() => {
     // Load Outfit (English) + Pretendard (Korean)
@@ -445,8 +474,20 @@ const MagpieSupply = () => {
             maxWidth: 1000,
           }}
         >
-          <div style={{ marginBottom: isMobile ? 32 : 56, display: "flex", justifyContent: "center" }}>
-            <LogoCard size={isMobile ? 160 : 240} />
+          <div style={{ marginBottom: isMobile ? 12 : 16, display: "flex", justifyContent: "center" }}>
+            <span
+              style={{
+                fontFamily: BASE_FONT,
+                fontSize: isMobile ? 30 : 46,
+                fontWeight: 700,
+                letterSpacing: "0.08em",
+                color: "#0F2B4A",
+                lineHeight: 1,
+                whiteSpace: "nowrap",
+              }}
+            >
+              MAGPIE SUPPLY
+            </span>
           </div>
 
           <div
@@ -628,7 +669,7 @@ const MagpieSupply = () => {
       {/* ═══ STATS ═══ */}
       <section
         style={{
-          background: "#FAFAF6",
+          background: "#F7F9FB",
           borderTop: "1px solid rgba(15,43,74,0.06)",
           borderBottom: "1px solid rgba(15,43,74,0.06)",
         }}
@@ -692,7 +733,7 @@ const MagpieSupply = () => {
         <div style={{ maxWidth: 1100, margin: "0 auto" }}>
           <div style={{ display: "grid", gridTemplateColumns: isMobile ? "1fr" : "1fr 1.2fr", gap: isMobile ? 40 : 80, alignItems: "center" }}>
             <div style={{ display: "flex", justifyContent: "center" }}>
-              <LogoCard size={isMobile ? 240 : 400} />
+              <LogoCard size={isMobile ? 180 : 280} />
             </div>
 
             <div>
@@ -827,7 +868,7 @@ const MagpieSupply = () => {
       </section>
 
       {/* ═══ PRODUCTS ═══ */}
-      <section id="products" style={{ padding: isMobile ? "64px clamp(20px, 5vw, 60px)" : "120px clamp(24px, 5vw, 60px)", background: "#FAFAF6" }}>
+      <section id="products" style={{ padding: isMobile ? "64px clamp(20px, 5vw, 60px)" : "120px clamp(24px, 5vw, 60px)", background: "#F2F5F8" }}>
         <div style={{ maxWidth: 1200, margin: "0 auto" }}>
           <SectionTitle
             sub="What We Supply"
@@ -964,7 +1005,7 @@ const MagpieSupply = () => {
         id="process"
         style={{
           padding: isMobile ? "64px clamp(20px, 5vw, 60px)" : "120px clamp(24px, 5vw, 60px)",
-          background: "linear-gradient(170deg, #081A2E, #0F2B4A, #163D66)",
+          background: "#E8F0F7",
           position: "relative",
           overflow: "hidden",
         }}
@@ -973,19 +1014,19 @@ const MagpieSupply = () => {
           style={{
             position: "absolute",
             inset: 0,
-            background: "radial-gradient(ellipse at 80% 20%, rgba(74,144,217,0.12), transparent 50%)",
+            background: "radial-gradient(ellipse at 80% 20%, rgba(74,144,217,0.10), transparent 50%)",
           }}
         />
 
         <div style={{ maxWidth: 1100, margin: "0 auto", position: "relative" }}>
-          <SectionTitle sub="How We Work" main="From Concept to Delivery" light />
+          <SectionTitle sub="How We Work" main="From Concept to Delivery" />
 
           <div style={{ display: "grid", gridTemplateColumns: isMobile ? "repeat(2, 1fr)" : "repeat(4, 1fr)", gap: isMobile ? 24 : 32, marginTop: isMobile ? 40 : 60 }}>
             {steps.map((step, i) => (
               <div
                 key={i}
                 style={{
-                  borderTop: "1px solid rgba(255,255,255,0.15)",
+                  borderTop: "1px solid rgba(15,43,74,0.18)",
                   paddingTop: 32,
                   transition: "all 0.3s",
                 }}
@@ -995,7 +1036,7 @@ const MagpieSupply = () => {
                     fontFamily: BASE_FONT,
                     fontSize: 13,
                     fontWeight: 600,
-                    color: "#A8C8E8",
+                    color: "#4A90D9",
                     letterSpacing: "0.25em",
                     marginBottom: 16,
                   }}
@@ -1007,14 +1048,14 @@ const MagpieSupply = () => {
                     fontFamily: BASE_FONT,
                     fontSize: 24,
                     fontWeight: 700,
-                    color: "#fff",
+                    color: "#0F2B4A",
                     marginBottom: 16,
                     letterSpacing: "-0.025em",
                   }}
                 >
                   {step.title}
                 </h4>
-                <p style={{ fontSize: 13, color: "rgba(255,255,255,0.55)", lineHeight: 1.7, fontWeight: 400 }}>
+                <p style={{ fontSize: 13, color: "#5a6a7a", lineHeight: 1.7, fontWeight: 400 }}>
                   {step.desc}
                 </p>
               </div>
@@ -1116,10 +1157,10 @@ const MagpieSupply = () => {
                 <LogoCard size={72} />
                 <div>
                   <div style={{ fontFamily: BASE_FONT, fontSize: 11, fontWeight: 600, color: "#0F2B4A" }}>
-                    반갑습니다
+                    좋은 인연, 여기서 시작됩니다.
                   </div>
                   <div style={{ fontSize: 11, color: "#8899aa", marginTop: 4, letterSpacing: "0.05em", fontWeight: 500 }}>
-                    We look forward to hearing from you.
+                    Great partnerships start with a simple hello.
                   </div>
                 </div>
               </div>
@@ -1127,16 +1168,16 @@ const MagpieSupply = () => {
 
             <div
               style={{
-                background: "#FAFAF6",
+                background: "#F2F5F8",
                 borderRadius: 4,
                 padding: isMobile ? 24 : 48,
                 border: "1px solid rgba(15,43,74,0.08)",
               }}
             >
               {[
-                { label: "Your Name", placeholder: "Jane Smith", type: "text" },
-                { label: "Email", placeholder: "jane@company.com", type: "email" },
-                { label: "Company", placeholder: "Your company name", type: "text" },
+                { label: "Your Name", placeholder: "Jane Smith", type: "text", name: "name" },
+                { label: "Email", placeholder: "jane@company.com", type: "email", name: "email" },
+                { label: "Company", placeholder: "Your company name", type: "text", name: "company" },
               ].map((field, i) => (
                 <div key={i} style={{ marginBottom: isMobile ? 18 : 24 }}>
                   <label
@@ -1154,6 +1195,9 @@ const MagpieSupply = () => {
                   </label>
                   <input
                     type={field.type}
+                    name={field.name}
+                    value={formData[field.name]}
+                    onChange={handleFormChange}
                     placeholder={field.placeholder}
                     style={{
                       width: "100%",
@@ -1190,6 +1234,9 @@ const MagpieSupply = () => {
                 </label>
                 <textarea
                   rows={3}
+                  name="message"
+                  value={formData.message}
+                  onChange={handleFormChange}
                   placeholder="Tell us about your project..."
                   style={{
                     width: "100%",
@@ -1211,9 +1258,11 @@ const MagpieSupply = () => {
               </div>
 
               <button
+                onClick={handleFormSubmit}
+                disabled={formStatus === "sending"}
                 style={{
                   width: "100%",
-                  background: "#0F2B4A",
+                  background: formStatus === "sending" ? "#8899aa" : "#0F2B4A",
                   color: "#fff",
                   border: "none",
                   borderRadius: 4,
@@ -1221,16 +1270,59 @@ const MagpieSupply = () => {
                   fontFamily: BASE_FONT,
                   fontSize: 13,
                   fontWeight: 600,
-                  cursor: "pointer",
+                  cursor: formStatus === "sending" ? "default" : "pointer",
                   letterSpacing: "0.1em",
                   textTransform: "uppercase",
                   transition: "background 0.3s",
                 }}
-                onMouseEnter={(e) => (e.target.style.background = "#4A90D9")}
-                onMouseLeave={(e) => (e.target.style.background = "#0F2B4A")}
+                onMouseEnter={(e) => {
+                  if (formStatus !== "sending") e.target.style.background = "#4A90D9";
+                }}
+                onMouseLeave={(e) => {
+                  if (formStatus !== "sending") e.target.style.background = "#0F2B4A";
+                }}
               >
-                Send Inquiry
+                {formStatus === "sending" ? "Sending..." : "Send Inquiry"}
               </button>
+
+              {formStatus === "success" && (
+                <div
+                  style={{
+                    marginTop: 18,
+                    padding: "14px 16px",
+                    background: "rgba(74,144,217,0.1)",
+                    borderRadius: 4,
+                    fontSize: 13,
+                    color: "#0F2B4A",
+                    fontWeight: 500,
+                    textAlign: "center",
+                    lineHeight: 1.6,
+                  }}
+                >
+                  메시지가 전송되었습니다. 곧 연락드리겠습니다.
+                  <br />
+                  Thank you — your message has been sent.
+                </div>
+              )}
+              {formStatus === "error" && (
+                <div
+                  style={{
+                    marginTop: 18,
+                    padding: "14px 16px",
+                    background: "rgba(200,60,60,0.08)",
+                    borderRadius: 4,
+                    fontSize: 13,
+                    color: "#b03a3a",
+                    fontWeight: 500,
+                    textAlign: "center",
+                    lineHeight: 1.6,
+                  }}
+                >
+                  이름, 이메일, 메시지를 모두 입력해 주세요.
+                  <br />
+                  Please fill in your name, email, and message.
+                </div>
+              )}
             </div>
           </div>
         </div>
