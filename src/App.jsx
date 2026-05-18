@@ -1301,9 +1301,9 @@ const MagpieSupply = () => {
                     lineHeight: 1.6,
                   }}
                 >
-                  메시지가 전송되었습니다. 곧 연락드리겠습니다.
+                  메시지가 무사히 둥지에 도착했습니다.
                   <br />
-                  Thank you — your message has been sent.
+                  Your message has landed safely in our nest.
                 </div>
               )}
               {formStatus === "error" && (
