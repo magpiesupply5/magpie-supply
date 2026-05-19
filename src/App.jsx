@@ -643,27 +643,6 @@ const MagpieSupply = () => {
             </button>
           </div>
         </div>
-
-        {!isMobile && (
-          <div
-            style={{
-              position: "absolute",
-              bottom: 36,
-              left: "50%",
-              transform: "translateX(-50%)",
-              display: "flex",
-              flexDirection: "column",
-              alignItems: "center",
-              gap: 10,
-              opacity: 0.4,
-            }}
-          >
-            <span style={{ fontFamily: BASE_FONT, fontSize: 10, fontWeight: 600, letterSpacing: "0.3em", color: "#0F2B4A" }}>
-              SCROLL
-            </span>
-            <div style={{ width: 1, height: 40, background: "linear-gradient(to bottom, #0F2B4A, transparent)" }} />
-          </div>
-        )}
       </section>
 
       {/* ═══ STATS ═══ */}
