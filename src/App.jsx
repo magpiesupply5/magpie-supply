@@ -129,6 +129,17 @@ const SectionTitle = ({ sub, main, desc, light = false, align = "center" }) => (
   </div>
 );
 
+// Auto-scan all images from /public/gallery/ folder
+// Steve가 폴더에 사진 추가하면 자동으로 메인 캐러셀에 나타남
+// 파일명을 01-, 02-, 03- 형식으로 시작하면 알파벳순으로 정렬됨
+const galleryImagesMap = import.meta.glob(
+  "/public/gallery/*.{jpg,jpeg,png,JPG,JPEG,PNG}",
+  { eager: true, query: "?url", import: "default" }
+);
+const galleryImages = Object.entries(galleryImagesMap)
+  .sort(([a], [b]) => a.localeCompare(b))
+  .map(([, url]) => url);
+
 const MagpieSupply = () => {
   const [scrollY, setScrollY] = useState(0);
   const [isMobile, setIsMobile] = useState(
@@ -137,6 +148,43 @@ const MagpieSupply = () => {
   const [menuOpen, setMenuOpen] = useState(false);
   const [formData, setFormData] = useState({ name: "", email: "", company: "", message: "" });
   const [formStatus, setFormStatus] = useState("idle"); // idle | sending | success | error
+
+  // Hero slideshow - 사진은 /public/hero/ 폴더의 hero-1.jpg ~ hero-4.jpg 자동 로드
+  const heroSlides = ["/hero/hero-1.jpg", "/hero/hero-2.jpg", "/hero/hero-3.jpg", "/hero/hero-4.jpg"];
+  const [currentSlide, setCurrentSlide] = useState(0);
+  const [loadedSlides, setLoadedSlides] = useState([]); // 실제로 존재하는 슬라이드 인덱스
+
+  // 슬라이드 이미지 존재 여부 확인 (없는 슬라이드는 자동 스킵)
+  useEffect(() => {
+    let cancelled = false;
+    Promise.all(
+      heroSlides.map((src, idx) => new Promise((resolve) => {
+        const img = new Image();
+        img.onload = () => resolve(idx);
+        img.onerror = () => resolve(null);
+        img.src = src;
+      }))
+    ).then((results) => {
+      if (!cancelled) {
+        const valid = results.filter((r) => r !== null);
+        setLoadedSlides(valid);
+      }
+    });
+    return () => { cancelled = true; };
+  }, []);
+
+  // 5초마다 자동 전환
+  useEffect(() => {
+    if (loadedSlides.length < 2) return;
+    const id = setInterval(() => {
+      setCurrentSlide((prev) => {
+        const currentIdx = loadedSlides.indexOf(prev);
+        const nextIdx = (currentIdx + 1) % loadedSlides.length;
+        return loadedSlides[nextIdx];
+      });
+    }, 5000);
+    return () => clearInterval(id);
+  }, [loadedSlides]);
 
   const handleFormChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -198,42 +246,13 @@ const MagpieSupply = () => {
 
   const navItems = [
     { id: "about", label: "About" },
-    { id: "products", label: "Products" },
+    { id: "products", label: "Our Work" },
     { id: "process", label: "Process" },
     { id: "contact", label: "Contact" },
   ];
 
-  const categories = [
-    {
-      num: "01",
-      title: "GWP & Promotional",
-      tag: "Core",
-      desc: "Gift-with-purchase programs for prestige beauty brands. Mirrors, pouches, candle vessels, and custom kits.",
-      items: ["Compact Mirrors", "Cosmetic Pouches", "Hair Accessories", "Custom Kits"],
-    },
-    {
-      num: "02",
-      title: "Skincare Packaging",
-      tag: "Featured",
-      desc: "Glass and plastic bottles, jars, airless pumps, droppers, and tubes — fully decorated to brand spec.",
-      items: ["Glass Bottles", "Airless Pumps", "Droppers", "Tubes"],
-    },
-    {
-      num: "03",
-      title: "Makeup Components",
-      tag: "Premium",
-      desc: "Compact cases, lip tubes, mascara containers, and palette systems. Custom tooling available.",
-      items: ["Compact Cases", "Lip Tubes", "Mascara", "Palettes"],
-    },
-    {
-      num: "04",
-      title: "Beauty Tools",
-      tag: "Heritage",
-      desc: "Cosmetic brushes, sponges, puffs, applicators, and lash curlers — backed by decades of expertise.",
-      items: ["Brush Sets", "Sponges", "Curlers", "Applicators"],
-    },
-  ];
-
+  // Auto-scan all images from /public/gallery/ folder
+  // Steve가 폴더에 사진 추가하면 자동으로 캐러셀에 나타남 (파일명 알파벳순)
   const steps = [
     { num: "01", title: "Consult", desc: "Share your vision. We assess feasibility, materials, and timeline." },
     { num: "02", title: "Source", desc: "We tap our network of 15+ vetted manufacturing partners across Asia." },
@@ -455,6 +474,37 @@ const MagpieSupply = () => {
           background: "#ffffff",
         }}
       >
+        {/* Slideshow background images - fade in/out */}
+        {heroSlides.map((src, idx) => (
+          <div
+            key={idx}
+            style={{
+              position: "absolute",
+              inset: 0,
+              backgroundImage: `url(${src})`,
+              backgroundSize: "cover",
+              backgroundPosition: "center",
+              opacity: loadedSlides.includes(idx) && currentSlide === idx ? 1 : 0,
+              transition: "opacity 1.5s ease-in-out",
+              zIndex: 0,
+            }}
+          />
+        ))}
+
+        {/* White overlay for text readability over photos */}
+        {loadedSlides.length > 0 && (
+          <div
+            style={{
+              position: "absolute",
+              inset: 0,
+              background: "rgba(255, 255, 255, 0.72)",
+              backdropFilter: "blur(2px)",
+              pointerEvents: "none",
+              zIndex: 0,
+            }}
+          />
+        )}
+
         <div
           style={{
             position: "absolute",
@@ -612,7 +662,7 @@ const MagpieSupply = () => {
                 e.target.style.transform = "translateY(0)";
               }}
             >
-              View Products
+              View Our Work
             </button>
             <button
               onClick={() => scrollTo("contact")}
@@ -643,6 +693,39 @@ const MagpieSupply = () => {
             </button>
           </div>
         </div>
+
+        {/* Slideshow indicator dots */}
+        {loadedSlides.length > 1 && (
+          <div
+            style={{
+              position: "absolute",
+              bottom: isMobile ? 24 : 40,
+              left: "50%",
+              transform: "translateX(-50%)",
+              display: "flex",
+              gap: 10,
+              zIndex: 2,
+            }}
+          >
+            {loadedSlides.map((idx) => (
+              <button
+                key={idx}
+                onClick={() => setCurrentSlide(idx)}
+                aria-label={`Show image ${idx + 1}`}
+                style={{
+                  width: currentSlide === idx ? 24 : 8,
+                  height: 8,
+                  borderRadius: 4,
+                  border: "none",
+                  background: currentSlide === idx ? "#0F2B4A" : "rgba(15,43,74,0.3)",
+                  cursor: "pointer",
+                  padding: 0,
+                  transition: "all 0.3s ease",
+                }}
+              />
+            ))}
+          </div>
+        )}
       </section>
 
       {/* ═══ STATS ═══ */}
@@ -846,127 +929,138 @@ const MagpieSupply = () => {
         </div>
       </section>
 
-      {/* ═══ PRODUCTS ═══ */}
-      <section id="products" style={{ padding: isMobile ? "64px clamp(20px, 5vw, 60px)" : "120px clamp(24px, 5vw, 60px)", background: "#F2F5F8" }}>
-        <div style={{ maxWidth: 1200, margin: "0 auto" }}>
+      {/* ═══ OUR WORK (HORIZONTAL CAROUSEL) ═══ */}
+      <section id="products" style={{ padding: isMobile ? "64px 0 64px" : "120px 0 120px", background: "#F2F5F8" }}>
+        <div style={{ padding: isMobile ? "0 clamp(20px, 5vw, 60px)" : "0 clamp(24px, 5vw, 60px)", maxWidth: 1200, margin: "0 auto" }}>
           <SectionTitle
-            sub="What We Supply"
-            main="Product Categories"
-            desc="From promotional gift sets to premium packaging — we source across the full beauty supply spectrum."
+            sub="Selected Work"
+            main="Our Work"
+            desc="Custom beauty accessories, tools, and GWP — designed and supplied for global prestige brands."
           />
+        </div>
 
+        {galleryImages.length === 0 ? (
           <div
             style={{
-              display: "grid",
-              gridTemplateColumns: isMobile ? "1fr" : "repeat(2, 1fr)",
-              gap: 1,
-              background: "rgba(15,43,74,0.08)",
-              border: "1px solid rgba(15,43,74,0.08)",
+              padding: "60px 20px",
+              textAlign: "center",
+              color: "#8899aa",
+              fontSize: 13,
+              fontWeight: 500,
+              letterSpacing: "0.05em",
             }}
           >
-            {categories.map((cat, i) => (
-              <div
-                key={i}
-                style={{
-                  background: "#fff",
-                  padding: "48px 40px",
-                  position: "relative",
-                  transition: "all 0.4s",
-                  cursor: "default",
-                  minHeight: 280,
-                }}
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.background = "#FAFAF6";
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.background = "#fff";
-                }}
-              >
-                <div
+            Add images to <code>public/gallery/</code> to populate this section.
+          </div>
+        ) : (
+          <div
+            style={{
+              marginTop: isMobile ? 40 : 60,
+              overflowX: "auto",
+              overflowY: "hidden",
+              scrollSnapType: "x mandatory",
+              WebkitOverflowScrolling: "touch",
+              scrollbarWidth: "none",
+              msOverflowStyle: "none",
+              cursor: "grab",
+            }}
+            className="hide-scrollbar"
+          >
+            <div
+              style={{
+                display: "flex",
+                gap: isMobile ? 12 : 20,
+                padding: isMobile ? "0 20px" : "0 clamp(24px, 5vw, 60px)",
+                width: "max-content",
+              }}
+            >
+              {galleryImages.slice(0, 12).map((src, i) => (
+                <a
+                  key={i}
+                  href="/gallery"
+                  aria-label="View full gallery"
                   style={{
-                    display: "flex",
-                    justifyContent: "space-between",
-                    alignItems: "flex-start",
-                    marginBottom: 32,
+                    flex: "0 0 auto",
+                    width: isMobile ? 240 : 320,
+                    aspectRatio: "1 / 1",
+                    background: "#fff",
+                    overflow: "hidden",
+                    borderRadius: 4,
+                    border: "1px solid rgba(15,43,74,0.06)",
+                    scrollSnapAlign: "start",
+                    textDecoration: "none",
+                    display: "block",
+                    transition: "transform 0.3s ease, box-shadow 0.3s ease",
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.transform = "translateY(-4px)";
+                    e.currentTarget.style.boxShadow = "0 12px 32px rgba(15,43,74,0.10)";
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.transform = "translateY(0)";
+                    e.currentTarget.style.boxShadow = "none";
                   }}
                 >
-                  <span
+                  <img
+                    src={src}
+                    alt={`Magpie Supply custom B2B beauty product ${i + 1}`}
+                    loading="lazy"
                     style={{
-                      fontFamily: BASE_FONT,
-                      fontSize: 38,
-                      fontWeight: 700,
-                      color: "rgba(15,43,74,0.15)",
-                      lineHeight: 1,
-                      letterSpacing: "-0.03em",
+                      width: "100%",
+                      height: "100%",
+                      objectFit: "cover",
+                      display: "block",
                     }}
-                  >
-                    {cat.num}
-                  </span>
-                  <span
-                    style={{
-                      fontFamily: BASE_FONT,
-                      fontSize: 10,
-                      fontWeight: 600,
-                      letterSpacing: "0.2em",
-                      textTransform: "uppercase",
-                      color: "#4A90D9",
-                    }}
-                  >
-                    — {cat.tag}
-                  </span>
-                </div>
+                  />
+                </a>
+              ))}
+            </div>
+          </div>
+        )}
 
-                <h3
-                  style={{
-                    fontFamily: BASE_FONT,
-                    fontSize: 26,
-                    fontWeight: 700,
-                    color: "#0F2B4A",
-                    marginBottom: 16,
-                    letterSpacing: "-0.025em",
-                  }}
-                >
-                  {cat.title}
-                </h3>
-
-                <p
-                  style={{
-                    fontSize: 14,
-                    color: "#5a6a7a",
-                    lineHeight: 1.7,
-                    marginBottom: 24,
-                    fontWeight: 400,
-                  }}
-                >
-                  {cat.desc}
-                </p>
-
-                <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
-                  {cat.items.map((item, j) => (
-                    <span
-                      key={j}
-                      style={{
-                        fontSize: 11,
-                        fontWeight: 500,
-                        color: "#5a6a7a",
-                        background: "rgba(15,43,74,0.04)",
-                        borderRadius: 2,
-                        padding: "5px 12px",
-                        letterSpacing: "0.01em",
-                      }}
-                    >
-                      {item}
-                    </span>
-                  ))}
-                </div>
-              </div>
-            ))}
+        <div style={{ padding: isMobile ? "0 clamp(20px, 5vw, 60px)" : "0 clamp(24px, 5vw, 60px)", maxWidth: 1200, margin: "0 auto" }}>
+          <div
+            style={{
+              textAlign: "center",
+              marginTop: isMobile ? 32 : 48,
+            }}
+          >
+            <a
+              href="/gallery"
+              style={{
+                display: "inline-block",
+                padding: isMobile ? "14px 28px" : "16px 36px",
+                background: "transparent",
+                color: "#0F2B4A",
+                fontFamily: BASE_FONT,
+                fontSize: 13,
+                fontWeight: 600,
+                letterSpacing: "0.1em",
+                textTransform: "uppercase",
+                textDecoration: "none",
+                border: "1px solid rgba(15,43,74,0.25)",
+                borderRadius: 4,
+                transition: "all 0.3s",
+              }}
+              onMouseEnter={(e) => {
+                e.target.style.background = "#0F2B4A";
+                e.target.style.color = "#fff";
+                e.target.style.borderColor = "#0F2B4A";
+              }}
+              onMouseLeave={(e) => {
+                e.target.style.background = "transparent";
+                e.target.style.color = "#0F2B4A";
+                e.target.style.borderColor = "rgba(15,43,74,0.25)";
+              }}
+            >
+              View All Work →
+            </a>
           </div>
 
           <div
             style={{
               textAlign: "center",
-              marginTop: 60,
+              marginTop: isMobile ? 32 : 40,
               fontSize: 12,
               fontWeight: 500,
               color: "#8899aa",
@@ -974,7 +1068,7 @@ const MagpieSupply = () => {
               textTransform: "uppercase",
             }}
           >
-            — Product gallery coming soon —
+            — Selected samples · Full catalogue available on request —
           </div>
         </div>
       </section>
