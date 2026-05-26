@@ -525,8 +525,8 @@ const MagpieSupply = () => {
             style={{
               position: "absolute",
               inset: 0,
-              background: "rgba(255, 255, 255, 0.72)",
-              backdropFilter: "blur(2px)",
+              background: "rgba(255, 255, 255, 0.5)",
+              backdropFilter: "blur(1px)",
               pointerEvents: "none",
               zIndex: 0,
             }}
